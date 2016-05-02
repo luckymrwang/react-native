@@ -13,23 +13,67 @@ import React, {
   View
 } from 'react-native';
 
+/**
+ * 为了避免骚扰，我们用了一个样例数据来替代Rotten Tomatoes的API
+ * 请求，这个样例数据放在React Native的Github库中。
+ */
+var REQUEST_URL = 'https://raw.githubusercontent.com/facebook/react-native/master/docs/MoviesExample.json';
+
 var MOCKED_MOVIES_DATA = [
   {title: '标题', year: '2015', posters: {thumbnail: 'http://i.imgur.com/UePbdph.jpg'}},
 ];
 
 class AwesomeProject extends Component {
+  constructor(props) {
+    super(props);   //这一句不能省略，照抄即可
+    this.state = {
+      movies: null,  //这里放你自己定义的state变量及初始值
+    };
+  }
+
+  componentDidMount() {
+    this.fetchData();
+  }
+
+  fetchData() {
+    fetch(REQUEST_URL)
+      .then((response) => response.json())
+      .then((responseData) => {
+        this.setState({
+          movies: responseData.movies,
+        });
+      })
+      .done();
+  }
+
   render() {
-    var movie = MOCKED_MOVIES_DATA[0];
+    if (!this.state.movies) {
+      return this.renderLoadingView();
+    }
+
+    var movie = this.state.movies[0];
+    return this.renderMovie(movie);
+  }
+
+  renderLoadingView() {
     return (
       <View style={styles.container}>
-        <Image source={{uri: movie.posters.thumbnail}} style={styles.thumbnail}/>
+        <Text>
+          正在加载电影数据……
+        </Text>
+      </View>
+    );
+  }
+
+  renderMovie(movie) {
+    return (
+      <View style={styles.container}>
+        <Image
+          source={{uri: movie.posters.thumbnail}}
+          style={styles.thumbnail}/>
         <View style={styles.rightContainer}>
-          <Text style={styles.title}>
-            {movie.title}
-          </Text>
-          <Text style={styles.year}>
-            {movie.year}
-          </Text>
+          <Text style={styles.title}>{movie.title}</Text>
+          <Text style={styles.year}>{movie.year}</Text>
         </View>
       </View>
     );
